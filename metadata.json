@@ -1,0 +1,5 @@
+{
+  "name": "Indra Furniture",
+  "description": "Aplikasi Katalog Furniture Mewah dengan Gaya Techno Wood",
+  "requestFramePermissions": ["geolocation"]
+}

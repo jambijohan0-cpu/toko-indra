@@ -1,0 +1,422 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  MapPin, 
+  Phone, 
+  MessageCircle, 
+  Share2, 
+  LogIn, 
+  LogOut, 
+  ChevronRight, 
+  Search,
+  Package,
+  Clock,
+  Tag,
+  Info
+} from 'lucide-react';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+interface FurnitureItem {
+  id: number;
+  timestamp: string;
+  kategori: string;
+  harga: string;
+  diskon: string;
+  tanggal_diskon_sampai: string;
+  keterangan: string; // Changed from promo_percent
+  stock: string;
+  status: string;
+  photo64base: string; // Changed from photo_url
+}
+
+const SEED_DATA: FurnitureItem[] = [
+  { id: 101, timestamp: new Date().toISOString(), kategori: "Sofa", harga: "Rp 4.500.000", diskon: "Rp 5.200.000", tanggal_diskon_sampai: "2026-04-01", keterangan: "15%", stock: "3", status: "Ready", photo64base: "https://picsum.photos/seed/sofa-1/800/600" },
+  { id: 102, timestamp: new Date().toISOString(), kategori: "Meja", harga: "Rp 2.100.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "NEW", stock: "5", status: "Ready", photo64base: "https://picsum.photos/seed/table-1/800/600" },
+  { id: 103, timestamp: new Date().toISOString(), kategori: "Kursi", harga: "Rp 850.000", diskon: "Rp 1.000.000", tanggal_diskon_sampai: "2026-03-30", keterangan: "HOT", stock: "12", status: "Ready", photo64base: "https://picsum.photos/seed/chair-1/800/600" },
+  { id: 104, timestamp: new Date().toISOString(), kategori: "Lemari", harga: "Rp 3.750.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "LIMIT", stock: "2", status: "Ready", photo64base: "https://picsum.photos/seed/wardrobe-1/800/600" },
+  { id: 105, timestamp: new Date().toISOString(), kategori: "Tempat Tidur", harga: "Rp 7.200.000", diskon: "Rp 8.500.000", tanggal_diskon_sampai: "2026-04-15", keterangan: "20%", stock: "1", status: "Ready", photo64base: "https://picsum.photos/seed/bed-1/800/600" },
+  // Adding more for 5 per category
+  { id: 106, kategori: "Sofa", harga: "Rp 5.800.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "", stock: "2", status: "Ready", photo64base: "https://picsum.photos/seed/sofa-2/800/600", timestamp: "" },
+  { id: 107, kategori: "Sofa", harga: "Rp 3.200.000", diskon: "Rp 3.800.000", tanggal_diskon_sampai: "2026-03-25", keterangan: "SALE", stock: "4", status: "Ready", photo64base: "https://picsum.photos/seed/sofa-3/800/600", timestamp: "" },
+  { id: 108, kategori: "Sofa", harga: "Rp 6.500.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "PREMIUM", stock: "1", status: "Ready", photo64base: "https://picsum.photos/seed/sofa-4/800/600", timestamp: "" },
+  { id: 109, kategori: "Sofa", harga: "Rp 4.100.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "", stock: "0", status: "Terjual", photo64base: "https://picsum.photos/seed/sofa-5/800/600", timestamp: "" },
+  { id: 110, kategori: "Meja", harga: "Rp 1.500.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "", stock: "8", status: "Ready", photo64base: "https://picsum.photos/seed/table-2/800/600", timestamp: "" },
+  { id: 111, kategori: "Meja", harga: "Rp 2.800.000", diskon: "Rp 3.200.000", tanggal_diskon_sampai: "2026-04-05", keterangan: "10%", stock: "3", status: "Ready", photo64base: "https://picsum.photos/seed/table-3/800/600", timestamp: "" },
+  { id: 112, kategori: "Meja", harga: "Rp 4.200.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "MARBLE", stock: "2", status: "Ready", photo64base: "https://picsum.photos/seed/table-4/800/600", timestamp: "" },
+  { id: 113, kategori: "Meja", harga: "Rp 1.200.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "MINIMAL", stock: "10", status: "Ready", photo64base: "https://picsum.photos/seed/table-5/800/600", timestamp: "" },
+  { id: 114, kategori: "Kursi", harga: "Rp 1.200.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "OFFICE", stock: "6", status: "Ready", photo64base: "https://picsum.photos/seed/chair-2/800/600", timestamp: "" },
+  { id: 115, kategori: "Kursi", harga: "Rp 550.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "", stock: "20", status: "Ready", photo64base: "https://picsum.photos/seed/chair-3/800/600", timestamp: "" },
+  { id: 116, kategori: "Kursi", harga: "Rp 2.400.000", diskon: "Rp 2.800.000", tanggal_diskon_sampai: "2026-03-28", keterangan: "LUX", stock: "4", status: "Ready", photo64base: "https://picsum.photos/seed/chair-4/800/600", timestamp: "" },
+  { id: 117, kategori: "Kursi", harga: "Rp 950.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "", stock: "0", status: "Terjual", photo64base: "https://picsum.photos/seed/chair-5/800/600", timestamp: "" },
+  { id: 118, kategori: "Lemari", harga: "Rp 2.500.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "", stock: "4", status: "Ready", photo64base: "https://picsum.photos/seed/wardrobe-2/800/600", timestamp: "" },
+  { id: 119, kategori: "Lemari", harga: "Rp 5.100.000", diskon: "Rp 6.000.000", tanggal_diskon_sampai: "2026-04-10", keterangan: "BIG", stock: "2", status: "Ready", photo64base: "https://picsum.photos/seed/wardrobe-3/800/600", timestamp: "" },
+  { id: 120, kategori: "Lemari", harga: "Rp 1.800.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "", stock: "7", status: "Ready", photo64base: "https://picsum.photos/seed/wardrobe-4/800/600", timestamp: "" },
+  { id: 121, kategori: "Lemari", harga: "Rp 4.400.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "WOOD", stock: "3", status: "Ready", photo64base: "https://picsum.photos/seed/wardrobe-5/800/600", timestamp: "" },
+  { id: 122, kategori: "Tempat Tidur", harga: "Rp 5.500.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "SINGLE", stock: "3", status: "Ready", photo64base: "https://picsum.photos/seed/bed-2/800/600", timestamp: "" },
+  { id: 123, kategori: "Tempat Tidur", harga: "Rp 9.800.000", diskon: "Rp 11.000.000", tanggal_diskon_sampai: "2026-05-01", keterangan: "KING", stock: "1", status: "Ready", photo64base: "https://picsum.photos/seed/bed-3/800/600", timestamp: "" },
+  { id: 124, kategori: "Tempat Tidur", harga: "Rp 6.200.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "", stock: "2", status: "Ready", photo64base: "https://picsum.photos/seed/bed-4/800/600", timestamp: "" },
+  { id: 125, kategori: "Tempat Tidur", harga: "Rp 8.100.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "COMFY", stock: "0", status: "Terjual", photo64base: "https://picsum.photos/seed/bed-5/800/600", timestamp: "" },
+];
+
+export default function App() {
+  const [items, setItems] = useState<FurnitureItem[]>(SEED_DATA);
+  const [loading, setLoading] = useState(true);
+  const [category, setCategory] = useState('Semua');
+  const [showLogin, setShowLogin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const categories = ['Semua', ...Array.from(new Set(items.map(item => item.kategori)))];
+
+  useEffect(() => {
+    fetchFurniture();
+  }, []);
+
+  const fetchFurniture = async () => {
+    try {
+      const res = await fetch('/api/furniture');
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setItems(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch furniture:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nama: username, password }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsAdmin(true);
+        setShowLogin(false);
+        alert('Selamat datang, Admin Indra!');
+      } else {
+        alert('Login Gagal, Bosku. Cek lagi ya!');
+      }
+    } catch (err) {
+      alert('Waduh, ada masalah koneksi nih.');
+    }
+  };
+
+  const shareLocation = () => {
+    const url = 'https://www.google.com/maps/place/Jl.+Husni+Thamrin+No.60,+Orang+Kayo+Hitam,+Kec.+Ps.+Jambi,+Kota+Jambi,+Jambi+36111';
+    window.open(url, '_blank');
+  };
+
+  const contactWA = (item?: FurnitureItem) => {
+    const phone = '6285366529875';
+    const message = item 
+      ? `Halo Indra Furniture, saya tertarik dengan ${item.kategori} seharga ${item.harga}. Apakah masih Ready?`
+      : 'Halo Indra Furniture, saya ingin bertanya tentang produk Anda.';
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  const filteredItems = category === 'Semua' 
+    ? items 
+    : items.filter(item => item.kategori === category);
+
+  return (
+    <div className="android-container min-h-screen flex flex-col bg-[#0a0502]">
+      {/* Header Section */}
+      <header className="relative z-10">
+        <div className="p-4 flex justify-between items-center glass border-b border-white/10 sticky top-0 z-50">
+          <img 
+            src="https://jambijohan0-cpu.github.io/Johan/img/logoindra2.jpeg" 
+            alt="Logo Indra Furniture" 
+            className="h-10 rounded-lg neon-glow-amber"
+            referrerPolicy="no-referrer"
+          />
+          <button 
+            onClick={() => isAdmin ? setIsAdmin(false) : setShowLogin(true)}
+            className="p-2 rounded-full glass hover:bg-white/10 transition-all"
+          >
+            {isAdmin ? <LogOut className="w-5 h-5 text-neon-amber" /> : <LogIn className="w-5 h-5 text-neon-amber" />}
+          </button>
+        </div>
+
+        <div className="relative h-64 w-full overflow-hidden">
+          <motion.img 
+            initial={{ scale: 1.2, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1.5 }}
+            src="https://jambijohan0-cpu.github.io/Johan/img/imgtoko.png" 
+            alt="Main Store" 
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0502] via-transparent to-transparent" />
+          <div className="absolute bottom-4 left-4 right-4">
+            <motion.h1 
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="text-3xl font-bold text-white tracking-tighter uppercase italic"
+            >
+              Indra <span className="text-neon-amber">Furniture</span>
+            </motion.h1>
+            <p className="text-xs text-white/60 font-mono uppercase tracking-widest mt-1">
+              Techno Wood & Luxury Living
+            </p>
+          </div>
+        </div>
+      </header>
+
+      {/* Info Section */}
+      <section className="p-4 space-y-4">
+        <motion.div 
+          initial={{ x: -20, opacity: 0 }}
+          whileInView={{ x: 0, opacity: 1 }}
+          className="glass p-4 rounded-2xl space-y-3"
+        >
+          <div className="flex items-start gap-3">
+            <MapPin className="w-5 h-5 text-neon-amber shrink-0 mt-1" />
+            <div>
+              <p className="text-sm font-medium">Jl. Husni Thamrin No.60</p>
+              <p className="text-xs text-white/50">Orang Kayo Hitam, Kec. Ps. Jambi, Kota Jambi</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Phone className="w-5 h-5 text-neon-cyan shrink-0" />
+            <p className="text-sm font-mono">0853-6652-9875</p>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <button 
+              onClick={shareLocation}
+              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-wider hover:bg-white/10 transition-all"
+            >
+              <Share2 className="w-4 h-4 text-neon-amber" />
+              Share Lokasi
+            </button>
+            <button 
+              onClick={() => contactWA()}
+              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-neon-amber/20 border border-neon-amber/30 text-xs font-bold uppercase tracking-wider hover:bg-neon-amber/30 transition-all text-neon-amber"
+            >
+              <MessageCircle className="w-4 h-4" />
+              WhatsApp
+            </button>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Category Filter */}
+      <div className="px-4 py-2 sticky top-[73px] z-40 bg-[#0a0502]/80 backdrop-blur-md">
+        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setCategory(cat)}
+              className={cn(
+                "px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border",
+                category === cat 
+                  ? "bg-neon-amber border-neon-amber text-black shadow-[0_0_10px_rgba(255,157,0,0.5)]" 
+                  : "glass border-white/10 text-white/60"
+              )}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Furniture Grid */}
+      <main className="flex-1 p-4">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center h-64 space-y-4">
+            <div className="w-12 h-12 border-4 border-neon-amber border-t-transparent rounded-full animate-spin" />
+            <p className="text-neon-amber font-mono text-xs animate-pulse">LOADING MEBEL MEWAH...</p>
+          </div>
+        ) : filteredItems.length > 0 ? (
+          <div className="grid grid-cols-1 gap-6">
+            <AnimatePresence mode="popLayout">
+              {filteredItems.map((item, idx) => (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ delay: idx * 0.05 }}
+                  onClick={() => contactWA(item)}
+                  className="group relative glass rounded-3xl overflow-hidden cursor-pointer active:scale-95 transition-transform"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <img 
+                      src={item.photo64base || `https://picsum.photos/seed/${item.kategori}-${item.id}/800/600`} 
+                      alt={item.kategori}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                    
+                    {/* Badges */}
+                    <div className="absolute top-3 left-3 flex flex-col gap-2">
+                      <span className="px-3 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-bold uppercase tracking-widest">
+                        {item.kategori}
+                      </span>
+                      {item.status === 'Terjual' && (
+                        <span className="px-3 py-1 rounded-lg bg-red-500/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest">
+                          TERJUAL
+                        </span>
+                      )}
+                    </div>
+
+                    {item.keterangan && (
+                      <div className="absolute top-3 right-3">
+                        <div className="w-12 h-12 rounded-full bg-neon-amber flex flex-col items-center justify-center shadow-lg rotate-12">
+                          <span className="text-[10px] font-black leading-none">PROMO</span>
+                          <span className="text-[10px] font-black text-center px-1">{item.keterangan}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-4 space-y-2">
+                    <div className="flex justify-between items-end">
+                      <div className="space-y-1">
+                        <p className="text-2xl font-black tracking-tighter italic">
+                          {item.harga}
+                        </p>
+                        {item.diskon && (
+                          <p className="text-xs text-white/40 line-through">
+                            {item.diskon}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <p className={cn(
+                          "text-[10px] font-bold uppercase tracking-widest",
+                          item.stock === '0' ? "text-red-400" : "text-neon-cyan"
+                        )}>
+                          Stock: {item.stock}
+                        </p>
+                      </div>
+                    </div>
+
+                    {item.tanggal_diskon_sampai && (
+                      <div className="flex items-center gap-2 text-[10px] text-neon-amber font-mono">
+                        <Clock className="w-3 h-3" />
+                        <span>PROMO SAMPAI: {item.tanggal_diskon_sampai}</span>
+                      </div>
+                    )}
+
+                    <div className="pt-2 flex items-center justify-between border-t border-white/5">
+                      <span className="text-[10px] text-white/30 font-mono">#{item.timestamp?.split('T')[0]}</span>
+                      <div className="flex items-center gap-1 text-neon-amber text-xs font-bold uppercase italic group-hover:translate-x-1 transition-transform">
+                        Cek Ready? <ChevronRight className="w-4 h-4" />
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-64 text-white/30 space-y-2">
+            <Package className="w-12 h-12 opacity-20" />
+            <p className="text-sm italic">Belum ada koleksi di kategori ini, Bosku.</p>
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="p-8 text-center space-y-4 border-t border-white/5">
+        <p className="text-[10px] text-white/20 uppercase tracking-[0.3em]">
+          © 2026 Indra Furniture Jambi
+        </p>
+        <div className="flex justify-center gap-4">
+          <div className="w-1 h-1 rounded-full bg-neon-amber" />
+          <div className="w-1 h-1 rounded-full bg-neon-cyan" />
+          <div className="w-1 h-1 rounded-full bg-neon-amber" />
+        </div>
+      </footer>
+
+      {/* Login Modal */}
+      <AnimatePresence>
+        {showLogin && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="glass w-full max-w-sm p-8 rounded-[2rem] space-y-6 relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-neon-amber to-neon-cyan" />
+              
+              <div className="text-center space-y-2">
+                <h2 className="text-2xl font-black italic uppercase tracking-tighter">Admin <span className="text-neon-amber">Access</span></h2>
+                <p className="text-xs text-white/40 font-mono">KHUSUS BOS INDRA FURNITURE</p>
+              </div>
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-2">Username</label>
+                  <input 
+                    type="text" 
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm focus:outline-none focus:border-neon-amber transition-all"
+                    placeholder="Nama Bos..."
+                    required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-2">Password</label>
+                  <input 
+                    type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm focus:outline-none focus:border-neon-amber transition-all"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+                <button 
+                  type="submit"
+                  className="w-full py-4 rounded-2xl bg-neon-amber text-black font-black uppercase tracking-widest shadow-[0_0_20px_rgba(255,157,0,0.3)] hover:scale-[1.02] active:scale-95 transition-all"
+                >
+                  MASUK BOSKU
+                </button>
+              </form>
+
+              <button 
+                onClick={() => setShowLogin(false)}
+                className="w-full py-2 text-[10px] font-bold uppercase tracking-widest text-white/30 hover:text-white transition-all"
+              >
+                KEMBALI KE KATALOG
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Action Button */}
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => contactWA()}
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-2xl bg-neon-cyan flex items-center justify-center text-black shadow-[0_0_20px_rgba(0,242,255,0.5)] sm:hidden"
+      >
+        <MessageCircle className="w-7 h-7" />
+      </motion.button>
+    </div>
+  );
+}

@@ -247,13 +247,17 @@ export default function App() {
     
     // We include the Image Link (Google Drive) in the message text.
     // This allows the seller to click and see the exact item image.
+    const imageLink = item?.photo64base?.startsWith('data:image') 
+      ? 'Gambar terlampir di katalog' 
+      : item?.photo64base;
+
     const message = item 
       ? `Halo Indra Furniture, saya tertarik dengan produk ini:\n\n` +
         `🛋️ *Produk:* ${item.kategori}\n` +
         `💰 *Harga:* ${item.harga}\n` +
         `📝 *Keterangan:* ${item.keterangan || '-'}\n` +
         `📍 *Status:* ${item.status}\n` +
-        `🖼️ *Link Gambar:* ${item.imageUrl}\n\n` +
+        `🖼️ *Link Gambar:* ${imageLink}\n\n` +
         `Apakah barang ini masih Ready, Bosku?`
       : 'Halo Indra Furniture, saya ingin bertanya tentang koleksi furniture Anda.';
       

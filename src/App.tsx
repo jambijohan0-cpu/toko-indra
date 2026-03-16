@@ -417,7 +417,7 @@ export default function App() {
           </div>
         </div>
 
-        <div className="relative h-[340px] w-full overflow-hidden">
+        <div className="relative h-[450px] w-full overflow-hidden">
           <motion.img 
             initial={{ scale: 1.1, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -427,61 +427,88 @@ export default function App() {
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
-          {/* Subtle overlay for text readability only */}
-          <div className="absolute inset-0 bg-black/20" />
-          <div className="absolute bottom-28 left-4 right-4">
+          {/* Very subtle overlay for text readability */}
+          <div className="absolute inset-0 bg-black/10" />
+          <div className="absolute bottom-40 left-4 right-4">
             <motion.h1 
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              className="text-3xl font-bold text-white tracking-tighter uppercase italic drop-shadow-lg"
+              className="text-3xl font-bold text-white tracking-tighter uppercase italic drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]"
             >
               Indra <span className="text-neon-amber">Furniture</span>
             </motion.h1>
-            <p className="text-xs text-white font-mono uppercase tracking-widest mt-1 drop-shadow-md">
+            <p className="text-xs text-white font-mono uppercase tracking-widest mt-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
               Techno Wood & Luxury Living
             </p>
           </div>
         </div>
       </header>
 
-      {/* Info Section - FULLY TRANSPARENT OVERLAP */}
-      <section className="px-4 -mt-24 relative z-20 space-y-4">
+      {/* Info Section - FULLY TRANSPARENT & ANIMATED */}
+      <section className="px-4 -mt-36 relative z-20 space-y-4">
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
-          className="bg-transparent p-5 rounded-[32px] space-y-5"
+          className="bg-transparent p-5 rounded-[32px] space-y-6"
         >
           <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-2xl bg-transparent flex items-center justify-center shrink-0 border border-neon-amber/40 shadow-[0_0_15px_rgba(255,157,0,0.2)]">
+            <motion.div 
+              animate={{ y: [0, -2, 0] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+              className="w-10 h-10 rounded-2xl bg-transparent flex items-center justify-center shrink-0 border border-neon-amber/40 shadow-[0_0_15px_rgba(255,157,0,0.3)]"
+            >
               <MapPin className="w-5 h-5 text-neon-amber" />
-            </div>
+            </motion.div>
             <div>
-              <p className="text-sm font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Jl. Husni Thamrin No.60</p>
-              <p className="text-xs text-white font-medium leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Orang Kayo Hitam, Kec. Ps. Jambi, Kota Jambi</p>
+              <p className="text-sm font-black text-white drop-shadow-[0_2px_6px_rgba(0,0,0,1)]">Jl. Husni Thamrin No.60</p>
+              <p className="text-xs text-white font-medium leading-relaxed drop-shadow-[0_2px_6px_rgba(0,0,0,1)]">Orang Kayo Hitam, Kec. Ps. Jambi, Kota Jambi</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-2xl bg-transparent flex items-center justify-center shrink-0 border border-neon-cyan/40 shadow-[0_0_15px_rgba(0,242,255,0.2)]">
+            <motion.div 
+              animate={{ y: [0, -2, 0] }}
+              transition={{ repeat: Infinity, duration: 2, delay: 0.5, ease: "easeInOut" }}
+              className="w-10 h-10 rounded-2xl bg-transparent flex items-center justify-center shrink-0 border border-neon-cyan/40 shadow-[0_0_15px_rgba(0,242,255,0.3)]"
+            >
               <Phone className="w-5 h-5 text-neon-cyan" />
-            </div>
-            <p className="text-sm font-black font-mono text-white tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">0853-6652-9875</p>
+            </motion.div>
+            <p className="text-sm font-black font-mono text-white tracking-wider drop-shadow-[0_2px_6px_rgba(0,0,0,1)]">0853-6652-9875</p>
           </div>
           
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            <button 
+          <div className="grid grid-cols-2 gap-4 pt-4">
+            <motion.button 
+              animate={{ 
+                y: [0, -6, 0],
+                scale: [1, 1.02, 1]
+              }}
+              transition={{ 
+                repeat: Infinity, 
+                duration: 3,
+                ease: "easeInOut"
+              }}
               onClick={shareLocation}
-              className="flex items-center justify-center gap-2 py-4 px-4 rounded-2xl bg-black/40 backdrop-blur-md border border-white/20 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all text-white shadow-xl"
+              className="flex items-center justify-center gap-2 py-4 px-4 rounded-2xl bg-transparent border-2 border-neon-amber/60 text-[10px] font-black uppercase tracking-widest hover:bg-neon-amber/20 transition-all text-white shadow-[0_0_20px_rgba(255,157,0,0.3)]"
             >
-              <Share2 className="w-4 h-4 text-neon-amber" />
+              <Share2 className="w-4 h-4 text-neon-amber animate-pulse" />
               Share Lokasi
-            </button>
-            <button 
+            </motion.button>
+            <motion.button 
+              animate={{ 
+                y: [0, -6, 0],
+                scale: [1, 1.02, 1]
+              }}
+              transition={{ 
+                repeat: Infinity, 
+                duration: 3,
+                delay: 0.5,
+                ease: "easeInOut"
+              }}
               onClick={() => contactWA()}
-              className="flex items-center justify-center gap-2 py-4 px-4 rounded-2xl bg-neon-amber/20 backdrop-blur-md border border-neon-amber/40 text-[10px] font-black uppercase tracking-widest hover:bg-neon-amber/40 transition-all text-neon-amber shadow-xl"
+              className="flex items-center justify-center gap-2 py-4 px-4 rounded-2xl bg-transparent border-2 border-neon-cyan/60 text-[10px] font-black uppercase tracking-widest hover:bg-neon-cyan/20 transition-all text-white shadow-[0_0_20px_rgba(0,242,255,0.3)]"
             >
-              <MessageCircle className="w-4 h-4" />
+              <MessageCircle className="w-4 h-4 text-neon-cyan animate-bounce" />
               WhatsApp
-            </button>
+            </motion.button>
           </div>
         </motion.div>
       </section>

@@ -36,7 +36,22 @@ interface FurnitureItem {
   photo64base: string; // Changed from photo_url
 }
 
+// Helper to normalize Google Drive links to high-performance format
+const normalizeImageUrl = (url: string) => {
+  if (!url) return `https://picsum.photos/seed/furniture/800/600`;
+  if (url.startsWith('data:image')) return url;
+  
+  // Handle Google Drive links
+  const driveMatch = url.match(/(?:drive\.google\.com\/(?:uc\?id=|file\/d\/)|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]+)/);
+  if (driveMatch && driveMatch[1]) {
+    return `https://lh3.googleusercontent.com/d/${driveMatch[1]}`;
+  }
+  
+  return url;
+};
+
 const SEED_DATA: FurnitureItem[] = [
+  { id: 100, timestamp: new Date().toISOString(), kategori: "Kursi", harga: "Rp 1.850.000", diskon: "Rp 2.100.000", tanggal_diskon_sampai: "2026-04-10", keterangan: "ERGONOMIC", stock: "5", status: "Ready", photo64base: "https://drive.google.com/uc?export=view&id=1iP49F6_hvskoJyer-vj5629GpANqxnoN" },
   { id: 101, timestamp: new Date().toISOString(), kategori: "Sofa", harga: "Rp 4.500.000", diskon: "Rp 5.200.000", tanggal_diskon_sampai: "2026-04-01", keterangan: "15%", stock: "3", status: "Ready", photo64base: "https://picsum.photos/seed/sofa-1/800/600" },
   { id: 102, timestamp: new Date().toISOString(), kategori: "Meja", harga: "Rp 2.100.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "NEW", stock: "5", status: "Ready", photo64base: "https://picsum.photos/seed/table-1/800/600" },
   { id: 103, timestamp: new Date().toISOString(), kategori: "Kursi", harga: "Rp 850.000", diskon: "Rp 1.000.000", tanggal_diskon_sampai: "2026-03-30", keterangan: "HOT", stock: "12", status: "Ready", photo64base: "https://picsum.photos/seed/chair-1/800/600" },
@@ -342,7 +357,7 @@ export default function App() {
                   />
                   {formData.photo64base && (
                     <img 
-                      src={formData.photo64base} 
+                      src={normalizeImageUrl(formData.photo64base)} 
                       className="mt-2 w-20 h-20 object-cover rounded-xl border border-white/20" 
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = `https://picsum.photos/seed/preview/800/600`;
@@ -535,7 +550,7 @@ export default function App() {
 
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <img 
-                      src={item.photo64base || `https://picsum.photos/seed/${item.kategori}-${item.id}/800/600`} 
+                      src={normalizeImageUrl(item.photo64base) || `https://picsum.photos/seed/${item.kategori}-${item.id}/800/600`} 
                       alt={item.kategori}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       referrerPolicy="no-referrer"

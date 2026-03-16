@@ -754,6 +754,40 @@ export default function App() {
         </div>
       </footer>
 
+      {/* Promotional Section for JOHAN */}
+      <div className="pb-12 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          className="p-6 rounded-[2rem] bg-emerald-500/10 border border-emerald-500/30 text-center space-y-4"
+        >
+          <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">
+            🚀 Pengen jualan makin gacor pake aplikasi ngeri kayak gini?
+          </p>
+          <motion.a
+            href="https://wa.me/6281341300100"
+            target="_blank"
+            rel="noopener noreferrer"
+            animate={{ 
+              scale: [1, 1.05, 1],
+              boxShadow: [
+                "0 0 0px rgba(16, 185, 129, 0)",
+                "0 0 20px rgba(16, 185, 129, 0.4)",
+                "0 0 0px rgba(16, 185, 129, 0)"
+              ]
+            }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="inline-flex flex-col items-center justify-center bg-emerald-500 text-black px-8 py-4 rounded-2xl font-black uppercase tracking-tighter italic"
+          >
+            <span className="text-[10px] leading-none mb-1 opacity-70">HUBUNGI DEVELOPER</span>
+            <span className="text-lg">JOHAN - 081341300100</span>
+          </motion.a>
+          <p className="text-[9px] text-white/30 uppercase tracking-[0.2em]">
+            Klik tombol hijau di atas buat bikin aplikasi promo Bosku!
+          </p>
+        </motion.div>
+      </div>
+
       {/* Login Modal */}
       <AnimatePresence>
         {showLogin && (

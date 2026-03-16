@@ -43,7 +43,7 @@ const normalizeImageUrl = (url: string) => {
   if (url.startsWith('data:image')) return url;
   
   // Handle Google Drive links
-  const driveMatch = url.match(/(?:drive\.google\.com\/(?:uc\?id=|file\/d\/)|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]+)/);
+  const driveMatch = url.match(/(?:drive\.google\.com\/.*(?:id=|file\/d\/)|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]+)/);
   if (driveMatch && driveMatch[1]) {
     return `https://lh3.googleusercontent.com/d/${driveMatch[1]}`;
   }
@@ -52,33 +52,11 @@ const normalizeImageUrl = (url: string) => {
 };
 
 const SEED_DATA: FurnitureItem[] = [
-  { id: 100, timestamp: new Date().toISOString(), kategori: "Kursi", harga: "Rp 1.850.000", diskon: "Rp 2.100.000", tanggal_diskon_sampai: "2026-04-10", keterangan: "ERGONOMIC", stock: "5", status: "Ready", photo64base: "https://drive.google.com/uc?export=view&id=1iP49F6_hvskoJyer-vj5629GpANqxnoN" },
-  { id: 101, timestamp: new Date().toISOString(), kategori: "Sofa", harga: "Rp 4.500.000", diskon: "Rp 5.200.000", tanggal_diskon_sampai: "2026-04-01", keterangan: "15%", stock: "3", status: "Ready", photo64base: "https://picsum.photos/seed/sofa-1/800/600" },
-  { id: 102, timestamp: new Date().toISOString(), kategori: "Meja", harga: "Rp 2.100.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "NEW", stock: "5", status: "Ready", photo64base: "https://picsum.photos/seed/table-1/800/600" },
-  { id: 103, timestamp: new Date().toISOString(), kategori: "Kursi", harga: "Rp 850.000", diskon: "Rp 1.000.000", tanggal_diskon_sampai: "2026-03-30", keterangan: "HOT", stock: "12", status: "Ready", photo64base: "https://picsum.photos/seed/chair-1/800/600" },
-  { id: 104, timestamp: new Date().toISOString(), kategori: "Lemari", harga: "Rp 3.750.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "LIMIT", stock: "2", status: "Ready", photo64base: "https://picsum.photos/seed/wardrobe-1/800/600" },
-  { id: 105, timestamp: new Date().toISOString(), kategori: "Tempat Tidur", harga: "Rp 7.200.000", diskon: "Rp 8.500.000", tanggal_diskon_sampai: "2026-04-15", keterangan: "20%", stock: "1", status: "Ready", photo64base: "https://picsum.photos/seed/bed-1/800/600" },
-  // Adding more for 5 per category
-  { id: 106, kategori: "Sofa", harga: "Rp 5.800.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "", stock: "2", status: "Ready", photo64base: "https://picsum.photos/seed/sofa-2/800/600", timestamp: "" },
-  { id: 107, kategori: "Sofa", harga: "Rp 3.200.000", diskon: "Rp 3.800.000", tanggal_diskon_sampai: "2026-03-25", keterangan: "SALE", stock: "4", status: "Ready", photo64base: "https://picsum.photos/seed/sofa-3/800/600", timestamp: "" },
-  { id: 108, kategori: "Sofa", harga: "Rp 6.500.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "PREMIUM", stock: "1", status: "Ready", photo64base: "https://picsum.photos/seed/sofa-4/800/600", timestamp: "" },
-  { id: 109, kategori: "Sofa", harga: "Rp 4.100.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "", stock: "0", status: "Terjual", photo64base: "https://picsum.photos/seed/sofa-5/800/600", timestamp: "" },
-  { id: 110, kategori: "Meja", harga: "Rp 1.500.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "", stock: "8", status: "Ready", photo64base: "https://picsum.photos/seed/table-2/800/600", timestamp: "" },
-  { id: 111, kategori: "Meja", harga: "Rp 2.800.000", diskon: "Rp 3.200.000", tanggal_diskon_sampai: "2026-04-05", keterangan: "10%", stock: "3", status: "Ready", photo64base: "https://picsum.photos/seed/table-3/800/600", timestamp: "" },
-  { id: 112, kategori: "Meja", harga: "Rp 4.200.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "MARBLE", stock: "2", status: "Ready", photo64base: "https://picsum.photos/seed/table-4/800/600", timestamp: "" },
-  { id: 113, kategori: "Meja", harga: "Rp 1.200.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "MINIMAL", stock: "10", status: "Ready", photo64base: "https://picsum.photos/seed/table-5/800/600", timestamp: "" },
-  { id: 114, kategori: "Kursi", harga: "Rp 1.200.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "OFFICE", stock: "6", status: "Ready", photo64base: "https://picsum.photos/seed/chair-2/800/600", timestamp: "" },
-  { id: 115, kategori: "Kursi", harga: "Rp 550.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "", stock: "20", status: "Ready", photo64base: "https://picsum.photos/seed/chair-3/800/600", timestamp: "" },
-  { id: 116, kategori: "Kursi", harga: "Rp 2.400.000", diskon: "Rp 2.800.000", tanggal_diskon_sampai: "2026-03-28", keterangan: "LUX", stock: "4", status: "Ready", photo64base: "https://picsum.photos/seed/chair-4/800/600", timestamp: "" },
-  { id: 117, kategori: "Kursi", harga: "Rp 950.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "", stock: "0", status: "Terjual", photo64base: "https://picsum.photos/seed/chair-5/800/600", timestamp: "" },
-  { id: 118, kategori: "Lemari", harga: "Rp 2.500.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "", stock: "4", status: "Ready", photo64base: "https://picsum.photos/seed/wardrobe-2/800/600", timestamp: "" },
-  { id: 119, kategori: "Lemari", harga: "Rp 5.100.000", diskon: "Rp 6.000.000", tanggal_diskon_sampai: "2026-04-10", keterangan: "BIG", stock: "2", status: "Ready", photo64base: "https://picsum.photos/seed/wardrobe-3/800/600", timestamp: "" },
-  { id: 120, kategori: "Lemari", harga: "Rp 1.800.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "", stock: "7", status: "Ready", photo64base: "https://picsum.photos/seed/wardrobe-4/800/600", timestamp: "" },
-  { id: 121, kategori: "Lemari", harga: "Rp 4.400.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "WOOD", stock: "3", status: "Ready", photo64base: "https://picsum.photos/seed/wardrobe-5/800/600", timestamp: "" },
-  { id: 122, kategori: "Tempat Tidur", harga: "Rp 5.500.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "SINGLE", stock: "3", status: "Ready", photo64base: "https://picsum.photos/seed/bed-2/800/600", timestamp: "" },
-  { id: 123, kategori: "Tempat Tidur", harga: "Rp 9.800.000", diskon: "Rp 11.000.000", tanggal_diskon_sampai: "2026-05-01", keterangan: "KING", stock: "1", status: "Ready", photo64base: "https://picsum.photos/seed/bed-3/800/600", timestamp: "" },
-  { id: 124, kategori: "Tempat Tidur", harga: "Rp 6.200.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "", stock: "2", status: "Ready", photo64base: "https://picsum.photos/seed/bed-4/800/600", timestamp: "" },
-  { id: 125, kategori: "Tempat Tidur", harga: "Rp 8.100.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "COMFY", stock: "0", status: "Terjual", photo64base: "https://picsum.photos/seed/bed-5/800/600", timestamp: "" },
+  { id: 1, timestamp: "2026-03-16", kategori: "Sofa Minimalis C", harga: "Rp 4.500.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "KOLEKSI TERBARU", stock: "10", status: "Ready", photo64base: "https://drive.google.com/uc?export=view&id=1PxdovVbl9u2V84otVFpuV-vj562" },
+  { id: 2, timestamp: "2026-03-16", kategori: "Meja Makan Kayu", harga: "Rp 7.200.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "KOLEKSI TERBARU", stock: "10", status: "Ready", photo64base: "https://drive.google.com/uc?export=view&id=1Q0uDrBowEW7ZstW-xE7v-vj562" },
+  { id: 3, timestamp: "2026-03-16", kategori: "Tempat Tidur Lux", harga: "Rp 12.000.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "KOLEKSI TERBARU", stock: "10", status: "Ready", photo64base: "https://drive.google.com/uc?export=view&id=1wl0GMzLfluwJ5kyflxtFw-vj562" },
+  { id: 4, timestamp: "2026-03-16", kategori: "Lemari Pakaian", harga: "Rp 3.800.000", diskon: "", tanggal_diskon_sampai: "", keterangan: "KOLEKSI TERBARU", stock: "10", status: "Ready", photo64base: "https://drive.google.com/uc?export=view&id=1-3W1RPsKyTBj_UAwT0v-vj562" },
+  { id: 5, timestamp: "2026-03-16", kategori: "Kursi Kerja Ergo", harga: "Rp 1.500.000", diskon: "Rp 1.600.000", tanggal_diskon_sampai: "", keterangan: "KOLEKSI TERBARU", stock: "10", status: "Ready", photo64base: "https://drive.google.com/uc?export=view&id=1iP49F6_hvskoJyer-vj5629GpANqxnoN" },
 ];
 
 export default function App() {

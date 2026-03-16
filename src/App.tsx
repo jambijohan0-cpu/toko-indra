@@ -194,7 +194,8 @@ export default function App() {
           kategori: '', harga: '', diskon: '', tanggal_diskon_sampai: '',
           keterangan: '', stock: '', status: 'Ready', photo64base: ''
         });
-        fetchFurniture();
+        // Refresh halaman utama sesuai permintaan
+        window.location.reload();
       } else {
         alert('Gagal: ' + result.error);
       }

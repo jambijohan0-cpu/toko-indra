@@ -13,21 +13,21 @@ async function startServer() {
 
   const WEB_APP_URL = process.env.WEB_APP_URL;
 
-  // Helper to fetch data (Supports Apps Script or Public Gviz)
+  // Fungsi utama untuk ambil data dari Google Apps Script
   async function getSheetData(sheetName: string) {
+    if (!WEB_APP_URL) {
+      throw new Error("WEB_APP_URL belum diatur di Settings!");
+    }
     try {
-      // Use Apps Script if provided (More stable & secure)
-      if (WEB_APP_URL) {
-        const url = `${WEB_APP_URL}${WEB_APP_URL.includes('?') ? '&' : '?'}sheet=${sheetName}`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Apps Script Error: ${response.status}`);
-        return await response.json();
-      }
-
-      // Fallback message if no URL configured
-      console.error("WEB_APP_URL tidak ditemukan di Environment Variables!");
-      return [];
+      const url = `${WEB_APP_URL}${WEB_APP_URL.includes('?') ? '&' : '?'}sheet=${sheetName}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Apps Script Error: ${response.status}`);
+      return await response.json();
     } catch (error) {
+      console.error(`Gagal ambil data ${sheetName}:`, error);
+      return [];
+    }
+  }
       console.error(`Error fetching sheet ${sheetName}:`, error);
       return [];
     }

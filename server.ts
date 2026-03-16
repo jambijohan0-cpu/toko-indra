@@ -2,43 +2,45 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import dotenv from "dotenv";
+import fetch from "node-fetch";
 
 dotenv.config();
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
+const app = express();
+const PORT = 3000;
 
-  app.use(express.json());
+app.use(express.json());
 
-  const WEB_APP_URL = process.env.WEB_APP_URL;
+const WEB_APP_URL = process.env.WEB_APP_URL;
 
-  // Fungsi utama untuk ambil data dari Google Apps Script
-  async function getSheetData(sheetName: string) {
-    if (!WEB_APP_URL) {
-      throw new Error("WEB_APP_URL belum diatur di Settings!");
-    }
-    try {
-      const url = `${WEB_APP_URL}${WEB_APP_URL.includes('?') ? '&' : '?'}sheet=${sheetName}`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`Apps Script Error: ${response.status}`);
-      return await response.json();
-    } catch (error) {
-      console.error(`Gagal ambil data ${sheetName}:`, error);
-      return [];
-    }
+// Fungsi utama untuk ambil data dari Google Apps Script
+async function getSheetData(sheetName: string) {
+  if (!WEB_APP_URL) {
+    throw new Error("WEB_APP_URL belum diatur di Settings!");
   }
-
-  // Helper to post data to Apps Script
-  async function postToSheet(action: string, data: any, id?: any) {
-    if (!WEB_APP_URL) throw new Error("WEB_APP_URL belum dikonfigurasi di Vercel");
-    const response = await fetch(WEB_APP_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action, data, id, sheet: "Gambar" }),
-    });
+  try {
+    const url = `${WEB_APP_URL}${WEB_APP_URL.includes('?') ? '&' : '?'}sheet=${sheetName}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Apps Script Error: ${response.status}`);
     return await response.json();
+  } catch (error) {
+    console.error(`Gagal ambil data ${sheetName}:`, error);
+    return [];
   }
+}
+
+// Helper to post data to Apps Script
+async function postToSheet(action: string, data: any, id?: any) {
+  if (!WEB_APP_URL) throw new Error("WEB_APP_URL belum dikonfigurasi di Vercel");
+  const response = await fetch(WEB_APP_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, data, id, sheet: "Gambar" }),
+  });
+  return await response.json();
+}
+
+async function setupServer() {
 
   // API Routes
   app.get("/api/furniture", async (req, res) => {
@@ -175,8 +177,8 @@ async function startServer() {
       console.log(`Server running on http://localhost:${PORT}`);
     });
   }
-
-  return app;
 }
 
-export default startServer();
+setupServer();
+
+export default app;

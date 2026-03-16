@@ -245,14 +245,15 @@ export default function App() {
   const contactWA = (item?: FurnitureItem) => {
     const phone = '6285366529875';
     
-    // WhatsApp links (wa.me) only support text. 
-    // We make the text very descriptive so the seller knows exactly which item it is.
+    // We include the Image Link (Google Drive) in the message text.
+    // This allows the seller to click and see the exact item image.
     const message = item 
       ? `Halo Indra Furniture, saya tertarik dengan produk ini:\n\n` +
         `🛋️ *Produk:* ${item.kategori}\n` +
         `💰 *Harga:* ${item.harga}\n` +
         `📝 *Keterangan:* ${item.keterangan || '-'}\n` +
-        `📍 *Status:* ${item.status}\n\n` +
+        `📍 *Status:* ${item.status}\n` +
+        `🖼️ *Link Gambar:* ${item.imageUrl}\n\n` +
         `Apakah barang ini masih Ready, Bosku?`
       : 'Halo Indra Furniture, saya ingin bertanya tentang koleksi furniture Anda.';
       

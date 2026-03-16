@@ -466,13 +466,13 @@ export default function App() {
           className="inline-block"
         >
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-neon-amber px-4">
-            🔥 Furniture paling kece & ter-mewah se-Kota Jambi! Kualitas ngeri, harga bersahabat. Cek katalog kita sekarang, Bosku! 🛋️✨
+            🔥 Furniture paling kece & ter-mewah se-Kota Jambi! Kualitas bagus, harga bersahabat. Cek katalog kita sekarang, Bosku! 🛋️✨
           </span>
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-neon-amber px-4">
-            🔥 Furniture paling kece & ter-mewah se-Kota Jambi! Kualitas ngeri, harga bersahabat. Cek katalog kita sekarang, Bosku! 🛋️✨
+            🔥 Furniture paling kece & ter-mewah se-Kota Jambi! Kualitas bagus, harga bersahabat. Cek katalog kita sekarang, Bosku! 🛋️✨
           </span>
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-neon-amber px-4">
-            🔥 Furniture paling kece & ter-mewah se-Kota Jambi! Kualitas ngeri, harga bersahabat. Cek katalog kita sekarang, Bosku! 🛋️✨
+            🔥 Furniture paling kece & ter-mewah se-Kota Jambi! Kualitas bagus, harga bersahabat. Cek katalog kita sekarang, Bosku! 🛋️✨
           </span>
         </motion.div>
       </div>
@@ -762,7 +762,7 @@ export default function App() {
           className="p-6 rounded-[2rem] bg-emerald-500/10 border border-emerald-500/30 text-center space-y-4"
         >
           <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">
-            🚀 Pengen jualan makin gacor pake aplikasi ngeri kayak gini?
+            🚀 Pengen jualan makin gacor pake aplikasi bagus kayak gini?
           </p>
           <motion.a
             href="https://wa.me/6281341300100"

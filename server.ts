@@ -114,21 +114,36 @@ async function startServer() {
 
   app.post("/api/login", async (req, res) => {
     const { nama, password } = req.body;
+    
+    if (!WEB_APP_URL) {
+      return res.status(500).json({ success: false, message: "WEB_APP_URL belum diatur di Settings!" });
+    }
+
     try {
-      if (!WEB_APP_URL) throw new Error("WEB_APP_URL belum dikonfigurasi");
       const response = await fetch(WEB_APP_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "login", nama, password }),
+        body: JSON.stringify({ 
+          action: "login", 
+          nama: nama, 
+          password: password 
+        }),
       });
+
+      if (!response.ok) {
+        throw new Error(`Server Google merespon dengan status: ${response.status}`);
+      }
+
       const result = await response.json();
+      
       if (result.success) {
         res.json({ success: true });
       } else {
-        res.status(401).json({ success: false, message: result.error || "Login Gagal!" });
+        res.status(401).json({ success: false, message: result.error || "Username atau Password salah!" });
       }
     } catch (error) {
-      res.status(500).json({ success: false, message: "Koneksi ke database bermasalah." });
+      console.error("Login Error:", error);
+      res.status(500).json({ success: false, message: "Gagal terhubung ke database. Pastikan URL Apps Script benar!" });
     }
   });
 

@@ -47,14 +47,15 @@ app.get("/api/health", (req, res) => {
 // API Routes
 app.get("/api/furniture", async (req, res) => {
   try {
-    let rows: any = await getSheetData("Gambar");
+    const data = await getSheetData("Gambar");
+    let rows: any[] = Array.isArray(data) ? data : [];
     
-    if (Array.isArray(rows) && rows.length > 0 && String(rows[0][0]).toLowerCase().includes("timestamp")) {
+    if (rows.length > 0 && Array.isArray(rows[0]) && String(rows[0][0]).toLowerCase().includes("timestamp")) {
       rows = rows.slice(1);
     }
 
-    const furniture = (Array.isArray(rows) ? rows : [])
-      .filter((row: any) => row.length >= 2 && row[1] !== "")
+    const furniture = rows
+      .filter((row: any) => Array.isArray(row) && row.length >= 2 && row[1] !== "")
       .map((row: any) => ({
         id: row[0],
         timestamp: row[0] || "",
@@ -119,7 +120,7 @@ app.post("/api/login", async (req, res) => {
       body: JSON.stringify({ action: "login", username, password }),
     });
 
-    const result: any = await response.json();
+    const result = await response.json() as { success?: boolean; error?: string };
     if (result.success) {
       res.json({ success: true });
     } else {

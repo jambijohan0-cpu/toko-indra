@@ -14,7 +14,8 @@ import {
   Tag,
   Info,
   Edit2,
-  Trash2
+  Trash2,
+  RefreshCw
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -81,7 +82,7 @@ const SEED_DATA: FurnitureItem[] = [
 ];
 
 export default function App() {
-  const [items, setItems] = useState<FurnitureItem[]>(SEED_DATA);
+  const [items, setItems] = useState<FurnitureItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('Semua');
   const [showLogin, setShowLogin] = useState(false);
@@ -110,14 +111,17 @@ export default function App() {
   }, []);
 
   const fetchFurniture = async () => {
+    setLoading(true);
     try {
       const res = await fetch('/api/furniture');
       const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
+      if (Array.isArray(data)) {
         setItems(data);
       }
     } catch (err) {
       console.error('Failed to fetch furniture:', err);
+      // Fallback to seed data if fetch fails completely and we have no items
+      if (items.length === 0) setItems(SEED_DATA);
     } finally {
       setLoading(false);
     }
@@ -408,6 +412,16 @@ export default function App() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button 
+              onClick={() => fetchFurniture()}
+              className={cn(
+                "p-2 rounded-full bg-white/5 hover:bg-white/10 transition-all",
+                loading && "animate-spin"
+              )}
+              title="Refresh Data"
+            >
+              <RefreshCw className="w-5 h-5 text-neon-cyan" />
+            </button>
             {isAdmin && (
               <button 
                 onClick={() => { setEditingItem(null); setShowAdminPanel(true); }}

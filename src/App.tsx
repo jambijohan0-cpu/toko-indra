@@ -374,13 +374,23 @@ export default function App() {
 
       {/* Header Section */}
       <header className="relative z-10">
-        <div className="p-4 flex justify-between items-center glass border-b border-white/10 sticky top-0 z-50">
-          <img 
-            src="https://jambijohan0-cpu.github.io/Johan/img/logoindra2.jpeg" 
-            alt="Logo Indra Furniture" 
-            className="h-10 rounded-lg neon-glow-amber"
-            referrerPolicy="no-referrer"
-          />
+        <div className="p-4 flex justify-between items-center bg-transparent backdrop-blur-md border-b border-white/5 sticky top-0 z-50">
+          <div className="flex items-center gap-3">
+            <img 
+              src="https://jambijohan0-cpu.github.io/Johan/img/logoindra2.jpeg" 
+              alt="Logo Indra Furniture" 
+              className="h-12 rounded-lg neon-glow-amber"
+              referrerPolicy="no-referrer"
+            />
+            <div className="flex flex-col leading-none">
+              <span className="text-2xl font-serif font-black text-red-600 italic tracking-[0.1em] drop-shadow-[2px_2px_0px_#1e40af]">
+                INDRA
+              </span>
+              <span className="text-[8px] font-sans font-black text-blue-500 tracking-[0.6em] mt-1 uppercase">
+                FURNITURE
+              </span>
+            </div>
+          </div>
           <div className="flex items-center gap-2">
             {isAdmin && (
               <button 
@@ -392,7 +402,7 @@ export default function App() {
             )}
             <button 
               onClick={() => isAdmin ? setIsAdmin(false) : setShowLogin(true)}
-              className="p-2 rounded-full glass hover:bg-white/10 transition-all"
+              className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-all"
             >
               {isAdmin ? <LogOut className="w-5 h-5 text-neon-amber" /> : <LogIn className="w-5 h-5 text-neon-amber" />}
             </button>
@@ -464,7 +474,7 @@ export default function App() {
       </section>
 
       {/* Category Filter */}
-      <div className="px-4 py-2 sticky top-[73px] z-40 bg-[#0a0502]/80 backdrop-blur-md">
+      <div className="px-4 py-2 sticky top-[81px] z-40 bg-transparent backdrop-blur-md">
         <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
           {categories.map((cat) => (
             <button

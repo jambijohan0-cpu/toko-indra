@@ -100,16 +100,19 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nama: username, password }),
       });
+      
       const data = await res.json();
-      if (data.success) {
+      
+      if (res.ok && data.success) {
         setIsAdmin(true);
         setShowLogin(false);
         alert('Selamat datang, Admin Indra!');
       } else {
-        alert('Login Gagal, Bosku. Cek lagi ya!');
+        alert(data.message || 'Login Gagal, Bosku. Cek lagi ya!');
       }
     } catch (err) {
-      alert('Waduh, ada masalah koneksi nih.');
+      console.error('Login error:', err);
+      alert('Waduh, ada masalah koneksi ke server nih. Pastikan internet lancar!');
     }
   };
 

@@ -2,7 +2,6 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import dotenv from "dotenv";
-import fetch from "node-fetch";
 
 dotenv.config();
 
@@ -14,21 +13,33 @@ async function startServer() {
 
   const SPREADSHEET_ID = process.env.SPREADSHEET_ID || "1FsqsWhtIemG8JzHOactZq0PPwUS6tOmOLrVLPzVD6m8";
 
-  // Helper to fetch public Google Sheet data
+  // Helper to fetch public Google Sheet data using native fetch
   async function getSheetData(sheetName: string) {
     try {
       const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
       const response = await fetch(url);
+      
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
       const text = await response.text();
-      const jsonStr = text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1);
+      const startIdx = text.indexOf("{");
+      const endIdx = text.lastIndexOf("}");
+      
+      if (startIdx === -1 || endIdx === -1) {
+        console.error(`Invalid JSON format from sheet ${sheetName}`);
+        return [];
+      }
+
+      const jsonStr = text.substring(startIdx, endIdx + 1);
       const data = JSON.parse(jsonStr);
       
       const rows = data.table.rows;
-      // Map rows and handle potential null cells or objects
       return rows.map((row: any) => {
         return row.c.map((cell: any) => {
           if (!cell) return "";
-          return cell.v !== null && cell.v !== undefined ? String(cell.v) : "";
+          // Handle cases where cell.v might be null or an object
+          if (cell.v === null || cell.v === undefined) return "";
+          return String(cell.v);
         });
       });
     } catch (error) {
@@ -43,52 +54,59 @@ async function startServer() {
       let rows = await getSheetData("Gambar");
       
       // Skip header if first row looks like header
-      if (rows.length > 0 && rows[0][0] === "timestamp") {
+      if (rows.length > 0 && String(rows[0][0]).toLowerCase().includes("timestamp")) {
         rows = rows.slice(1);
       }
 
       const furniture = rows
-        .filter((row: any) => row.length >= 9 && row[1] !== "") // Filter empty rows
+        .filter((row: any) => row.length >= 2 && row[1] !== "") // Filter empty rows
         .map((row: any, index: number) => ({
           id: index,
-          timestamp: row[0],
-          kategori: row[1],
-          harga: row[2],
-          diskon: row[3],
-          tanggal_diskon_sampai: row[4],
-          keterangan: row[5],
-          stock: row[6],
-          status: row[7],
-          photo64base: row[8],
+          timestamp: row[0] || "",
+          kategori: row[1] || "Uncategorized",
+          harga: row[2] || "Rp 0",
+          diskon: row[3] || "",
+          tanggal_diskon_sampai: row[4] || "",
+          keterangan: row[5] || "",
+          stock: row[6] || "0",
+          status: row[7] || "Ready",
+          photo64base: row[8] || "",
         })).reverse(); 
 
       res.json(furniture);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch furniture data" });
+      res.status(500).json({ error: "Gagal mengambil data furniture" });
     }
   });
 
   app.post("/api/login", async (req, res) => {
     const { nama, password } = req.body;
+    if (!nama || !password) {
+      return res.status(400).json({ success: false, message: "Nama dan Password harus diisi!" });
+    }
+
     try {
-      const rows = await getSheetData("Login");
+      let rows = await getSheetData("Login");
       
-      // Find user matching credentials and status 'aktif'
-      // Indices: 0:id, 1:nama, 2:password, 3:tgl_login, 4:Status
+      // Skip header
+      if (rows.length > 0 && String(rows[0][1]).toLowerCase().includes("nama")) {
+        rows = rows.slice(1);
+      }
+
       const user = rows.find((row: any) => 
         row.length >= 5 &&
-        row[1].toLowerCase() === nama.toLowerCase() && 
-        row[2] === password && 
-        row[4].toLowerCase() === "aktif"
+        String(row[1]).toLowerCase() === String(nama).toLowerCase() && 
+        String(row[2]) === String(password) && 
+        String(row[4]).toLowerCase() === "aktif"
       );
 
       if (user) {
         res.json({ success: true, user: { id: user[0], nama: user[1] } });
       } else {
-        res.status(401).json({ success: false, message: "Login Gagal, Bosku. Cek Nama/Password atau Status Aktif." });
+        res.status(401).json({ success: false, message: "Login Gagal! Cek Nama/Password atau pastikan Status Aktif di Spreadsheet." });
       }
     } catch (error) {
-      res.status(500).json({ error: "Login system error" });
+      res.status(500).json({ success: false, message: "Sistem login sedang bermasalah." });
     }
   });
 

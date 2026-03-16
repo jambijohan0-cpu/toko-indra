@@ -553,7 +553,7 @@ export default function App() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                     
                     {/* Badges */}
-                    <div className="absolute top-3 left-3 flex flex-col gap-2">
+                    <div className="absolute top-3 left-3 flex flex-col gap-2 z-20">
                       <span className="px-3 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-bold uppercase tracking-widest">
                         {item.kategori}
                       </span>
@@ -563,6 +563,36 @@ export default function App() {
                         </span>
                       )}
                     </div>
+
+                    {/* GAUL DISCOUNT TAG */}
+                    {item.diskon && (
+                      <motion.div 
+                        initial={{ scale: 0, rotate: -45 }}
+                        animate={{ 
+                          scale: [1, 1.1, 1],
+                          rotate: [-15, -10, -15],
+                          opacity: [1, 0.7, 1]
+                        }}
+                        transition={{ 
+                          repeat: Infinity, 
+                          duration: 1.5,
+                          ease: "easeInOut"
+                        }}
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none"
+                      >
+                        <div className="relative">
+                          {/* The Tag Shape */}
+                          <div className="bg-red-600 text-white px-6 py-3 rounded-sm shadow-[0_0_20px_rgba(220,38,38,0.5)] border-2 border-white/30 flex flex-col items-center justify-center min-w-[120px] transform -rotate-12">
+                            <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-black rounded-full border-2 border-white/20" />
+                            <span className="text-[10px] font-black tracking-[0.2em] opacity-80 mb-1">DISKON</span>
+                            <span className="text-xl font-black tracking-tighter drop-shadow-lg">
+                              {item.diskon.replace('Rp', '').trim()}
+                            </span>
+                            <div className="absolute -right-1 -bottom-1 w-full h-full border-2 border-white/10 rounded-sm -z-10 translate-x-1 translate-y-1" />
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
 
                     {item.keterangan && (
                       <div className="absolute top-3 right-3">

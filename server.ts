@@ -113,7 +113,7 @@ async function startServer() {
   });
 
   app.post("/api/login", async (req, res) => {
-    const { nama, password } = req.body;
+    const { username, password } = req.body;
     
     if (!WEB_APP_URL) {
       return res.status(500).json({ success: false, message: "WEB_APP_URL belum diatur di Settings!" });
@@ -125,7 +125,7 @@ async function startServer() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           action: "login", 
-          nama: nama, 
+          username: username, 
           password: password 
         }),
       });

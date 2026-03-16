@@ -44,6 +44,22 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", webAppUrlSet: !!WEB_APP_URL });
 });
 
+const formatRupiah = (val: any) => {
+  if (!val) return "Rp 0";
+  // If it's already a formatted string, return it, otherwise format it
+  if (typeof val === 'string' && val.includes('Rp')) return val;
+  
+  const num = typeof val === 'number' ? val : parseInt(String(val).replace(/[^0-9]/g, ''), 10);
+  if (isNaN(num)) return "Rp 0";
+  
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(num).replace('IDR', 'Rp');
+};
+
 // API Routes
 app.get("/api/furniture", async (req, res) => {
   try {
@@ -60,8 +76,8 @@ app.get("/api/furniture", async (req, res) => {
         id: row[0],
         timestamp: row[0] || "",
         kategori: row[1] || "Uncategorized",
-        harga: row[2] || "Rp 0",
-        diskon: row[3] || "",
+        harga: formatRupiah(row[2]),
+        diskon: row[3] ? formatRupiah(row[3]) : "",
         tanggal_diskon_sampai: row[4] || "",
         keterangan: row[5] || "",
         stock: row[6] || "0",

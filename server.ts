@@ -28,10 +28,6 @@ async function startServer() {
       return [];
     }
   }
-      console.error(`Error fetching sheet ${sheetName}:`, error);
-      return [];
-    }
-  }
 
   // Helper to post data to Apps Script
   async function postToSheet(action: string, data: any, id?: any) {

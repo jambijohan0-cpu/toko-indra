@@ -138,7 +138,36 @@ export default function App() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData({ ...formData, photo64base: reader.result as string });
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 400; // Sesuai untuk mobile
+          const MAX_HEIGHT = 400;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          // Kompres kualitas ke 0.6 agar muat di Google Sheets (limit 50rb karakter)
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+          setFormData({ ...formData, photo64base: compressedBase64 });
+        };
+        img.src = reader.result as string;
       };
       reader.readAsDataURL(file);
     }
@@ -311,7 +340,13 @@ export default function App() {
                     className="w-full text-white/40 text-xs"
                   />
                   {formData.photo64base && (
-                    <img src={formData.photo64base} className="mt-2 w-20 h-20 object-cover rounded-xl border border-white/20" />
+                    <img 
+                      src={formData.photo64base} 
+                      className="mt-2 w-20 h-20 object-cover rounded-xl border border-white/20" 
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = `https://picsum.photos/seed/preview/800/600`;
+                      }}
+                    />
                   )}
                 </div>
 
@@ -493,6 +528,9 @@ export default function App() {
                       alt={item.kategori}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${item.kategori}-${item.id}/800/600`;
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                     

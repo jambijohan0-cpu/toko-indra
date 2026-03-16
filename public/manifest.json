@@ -1,0 +1,21 @@
+{
+  "name": "Indra Furniture Jambi",
+  "short_name": "IndraFurniture",
+  "description": "Katalog Furniture Terbaik & Terbagus di Kota Jambi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#ff9d00",
+  "icons": [
+    {
+      "src": "https://jambijohan0-cpu.github.io/Johan/img/logoindra2.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "https://jambijohan0-cpu.github.io/Johan/img/logoindra2.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

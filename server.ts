@@ -120,9 +120,11 @@ async function startServer() {
     }
 
     try {
+      console.log("Attempting login to Google Apps Script...");
       const response = await fetch(WEB_APP_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        redirect: 'follow',
         body: JSON.stringify({ 
           action: "login", 
           username: username, 
@@ -130,14 +132,18 @@ async function startServer() {
         }),
       });
 
+      console.log("Google Apps Script response status:", response.status);
       const contentType = response.headers.get("content-type");
+      console.log("Content-Type from Google:", contentType);
+
       if (!contentType || !contentType.includes("application/json")) {
         const text = await response.text();
-        console.error("Google Response Not JSON:", text);
-        throw new Error("Respon dari Google bukan format JSON. Cek apakah Script sudah di-Deploy sebagai Web App.");
+        console.error("Non-JSON response from Google:", text.substring(0, 200));
+        throw new Error("Respon dari Google bukan format JSON. Pastikan Script sudah di-Deploy sebagai Web App dan aksesnya 'Anyone'.");
       }
 
       const result = await response.json();
+      console.log("Login result from Google:", result);
       
       if (result.success) {
         res.json({ success: true });

@@ -124,11 +124,12 @@ export default function App() {
         setShowLogin(false);
         alert('Selamat datang, Admin Indra!');
       } else {
+        // Tampilkan pesan error spesifik dari server
         alert(data.message || 'Login Gagal, Bosku. Cek lagi ya!');
       }
     } catch (err) {
-      console.error('Login error:', err);
-      alert('Waduh, ada masalah koneksi ke server nih. Pastikan internet lancar!');
+      console.error('Login error detail:', err);
+      alert('Gagal terhubung ke server. Pastikan URL Apps Script sudah diisi di Settings (WEB_APP_URL)!');
     }
   };
 

@@ -11,41 +11,37 @@ async function startServer() {
 
   app.use(express.json());
 
-  const SPREADSHEET_ID = process.env.SPREADSHEET_ID || "1FsqsWhtIemG8JzHOactZq0PPwUS6tOmOLrVLPzVD6m8";
+  const WEB_APP_URL = process.env.WEB_APP_URL;
 
-  // Helper to fetch public Google Sheet data using native fetch
+  // Helper to fetch data (Supports Apps Script or Public Gviz)
   async function getSheetData(sheetName: string) {
     try {
-      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
-      const response = await fetch(url);
-      
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      
-      const text = await response.text();
-      const startIdx = text.indexOf("{");
-      const endIdx = text.lastIndexOf("}");
-      
-      if (startIdx === -1 || endIdx === -1) {
-        console.error(`Invalid JSON format from sheet ${sheetName}`);
-        return [];
+      // Use Apps Script if provided (More stable & secure)
+      if (WEB_APP_URL) {
+        const url = `${WEB_APP_URL}${WEB_APP_URL.includes('?') ? '&' : '?'}sheet=${sheetName}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Apps Script Error: ${response.status}`);
+        return await response.json();
       }
 
-      const jsonStr = text.substring(startIdx, endIdx + 1);
-      const data = JSON.parse(jsonStr);
-      
-      const rows = data.table.rows;
-      return rows.map((row: any) => {
-        return row.c.map((cell: any) => {
-          if (!cell) return "";
-          // Handle cases where cell.v might be null or an object
-          if (cell.v === null || cell.v === undefined) return "";
-          return String(cell.v);
-        });
-      });
+      // Fallback message if no URL configured
+      console.error("WEB_APP_URL tidak ditemukan di Environment Variables!");
+      return [];
     } catch (error) {
       console.error(`Error fetching sheet ${sheetName}:`, error);
       return [];
     }
+  }
+
+  // Helper to post data to Apps Script
+  async function postToSheet(action: string, data: any, id?: any) {
+    if (!WEB_APP_URL) throw new Error("WEB_APP_URL belum dikonfigurasi di Vercel");
+    const response = await fetch(WEB_APP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, data, id, sheet: "Gambar" }),
+    });
+    return await response.json();
   }
 
   // API Routes
@@ -61,7 +57,7 @@ async function startServer() {
       const furniture = rows
         .filter((row: any) => row.length >= 2 && row[1] !== "") // Filter empty rows
         .map((row: any, index: number) => ({
-          id: index,
+          id: row[0], // Use timestamp as ID
           timestamp: row[0] || "",
           kategori: row[1] || "Uncategorized",
           harga: row[2] || "Rp 0",
@@ -79,34 +75,60 @@ async function startServer() {
     }
   });
 
+  // Add Furniture
+  app.post("/api/furniture", async (req, res) => {
+    try {
+      const { kategori, harga, diskon, tanggal_diskon_sampai, keterangan, stock, status, photo64base } = req.body;
+      const timestamp = new Date().toISOString();
+      const rowData = [timestamp, kategori, harga, diskon, tanggal_diskon_sampai, keterangan, stock, status, photo64base];
+      const result = await postToSheet("add", rowData);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ success: false, error: error instanceof Error ? error.message : "Gagal menambah data" });
+    }
+  });
+
+  // Update Furniture
+  app.put("/api/furniture/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { kategori, harga, diskon, tanggal_diskon_sampai, keterangan, stock, status, photo64base } = req.body;
+      const rowData = [id, kategori, harga, diskon, tanggal_diskon_sampai, keterangan, stock, status, photo64base];
+      const result = await postToSheet("update", rowData, id);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ success: false, error: error instanceof Error ? error.message : "Gagal update data" });
+    }
+  });
+
+  // Delete Furniture
+  app.delete("/api/furniture/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const result = await postToSheet("delete", [], id);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ success: false, error: error instanceof Error ? error.message : "Gagal menghapus data" });
+    }
+  });
+
   app.post("/api/login", async (req, res) => {
     const { nama, password } = req.body;
-    if (!nama || !password) {
-      return res.status(400).json({ success: false, message: "Nama dan Password harus diisi!" });
-    }
-
     try {
-      let rows = await getSheetData("Login");
-      
-      // Skip header
-      if (rows.length > 0 && String(rows[0][1]).toLowerCase().includes("nama")) {
-        rows = rows.slice(1);
-      }
-
-      const user = rows.find((row: any) => 
-        row.length >= 5 &&
-        String(row[1]).toLowerCase() === String(nama).toLowerCase() && 
-        String(row[2]) === String(password) && 
-        String(row[4]).toLowerCase() === "aktif"
-      );
-
-      if (user) {
-        res.json({ success: true, user: { id: user[0], nama: user[1] } });
+      if (!WEB_APP_URL) throw new Error("WEB_APP_URL belum dikonfigurasi");
+      const response = await fetch(WEB_APP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "login", nama, password }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        res.json({ success: true });
       } else {
-        res.status(401).json({ success: false, message: "Login Gagal! Cek Nama/Password atau pastikan Status Aktif di Spreadsheet." });
+        res.status(401).json({ success: false, message: result.error || "Login Gagal!" });
       }
     } catch (error) {
-      res.status(500).json({ success: false, message: "Sistem login sedang bermasalah." });
+      res.status(500).json({ success: false, message: "Koneksi ke database bermasalah." });
     }
   });
 

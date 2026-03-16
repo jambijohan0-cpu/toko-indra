@@ -12,7 +12,9 @@ import {
   Package,
   Clock,
   Tag,
-  Info
+  Info,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -71,6 +73,20 @@ export default function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  
+  // Admin Management State
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [editingItem, setEditingItem] = useState<FurnitureItem | null>(null);
+  const [formData, setFormData] = useState({
+    kategori: '',
+    harga: '',
+    diskon: '',
+    tanggal_diskon_sampai: '',
+    keterangan: '',
+    stock: '',
+    status: 'Ready',
+    photo64base: ''
+  });
 
   const categories = ['Semua', ...Array.from(new Set(items.map(item => item.kategori)))];
 
@@ -116,6 +132,83 @@ export default function App() {
     }
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, photo64base: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const method = editingItem ? 'PUT' : 'POST';
+      const url = editingItem ? `/api/furniture/${editingItem.id}` : '/api/furniture';
+      
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      
+      const result = await res.json();
+      if (result.success) {
+        alert(editingItem ? 'Produk Berhasil Diupdate!' : 'Produk Berhasil Ditambah!');
+        setEditingItem(null);
+        setFormData({
+          kategori: '', harga: '', diskon: '', tanggal_diskon_sampai: '',
+          keterangan: '', stock: '', status: 'Ready', photo64base: ''
+        });
+        fetchFurniture();
+      } else {
+        alert('Gagal: ' + result.error);
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan sistem.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string | number) => {
+    if (!confirm('Yakin mau hapus produk ini, Bosku?')) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/furniture/${id}`, { method: 'DELETE' });
+      const result = await res.json();
+      if (result.success) {
+        alert('Produk Terhapus!');
+        fetchFurniture();
+      } else {
+        alert('Gagal hapus: ' + result.error);
+      }
+    } catch (err) {
+      alert('Gagal koneksi ke server.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openEdit = (item: FurnitureItem) => {
+    setEditingItem(item);
+    setFormData({
+      kategori: item.kategori,
+      harga: item.harga,
+      diskon: item.diskon,
+      tanggal_diskon_sampai: item.tanggal_diskon_sampai,
+      keterangan: item.keterangan,
+      stock: item.stock,
+      status: item.status,
+      photo64base: item.photo64base
+    });
+    setShowAdminPanel(true);
+  };
+
   const shareLocation = () => {
     const url = 'https://www.google.com/maps/place/Jl.+Husni+Thamrin+No.60,+Orang+Kayo+Hitam,+Kec.+Ps.+Jambi,+Kota+Jambi,+Jambi+36111';
     window.open(url, '_blank');
@@ -135,6 +228,114 @@ export default function App() {
 
   return (
     <div className="android-container min-h-screen flex flex-col bg-[#0a0502]">
+      {/* Admin Panel Modal */}
+      <AnimatePresence>
+        {showAdminPanel && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="w-full max-w-md bg-zinc-900 border border-white/10 rounded-[32px] p-8 overflow-y-auto max-h-[90vh]"
+            >
+              <h2 className="text-2xl font-black text-white mb-6 uppercase tracking-tighter italic">
+                {editingItem ? 'EDIT PRODUK' : 'TAMBAH PRODUK'}
+              </h2>
+              
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Kategori</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={formData.kategori}
+                    onChange={e => setFormData({...formData, kategori: e.target.value})}
+                    className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
+                    placeholder="Contoh: Sofa, Meja..."
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Harga</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={formData.harga}
+                      onChange={e => setFormData({...formData, harga: e.target.value})}
+                      className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
+                      placeholder="Rp 1.000.000"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Stock</label>
+                    <input 
+                      type="number" 
+                      required
+                      value={formData.stock}
+                      onChange={e => setFormData({...formData, stock: e.target.value})}
+                      className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Diskon (Opsional)</label>
+                  <input 
+                    type="text" 
+                    value={formData.diskon}
+                    onChange={e => setFormData({...formData, diskon: e.target.value})}
+                    className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
+                    placeholder="Harga Coret (Rp 1.200.000)"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Keterangan / Promo</label>
+                  <input 
+                    type="text" 
+                    value={formData.keterangan}
+                    onChange={e => setFormData({...formData, keterangan: e.target.value})}
+                    className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
+                    placeholder="Contoh: 15% OFF, NEW, HOT"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Foto Produk</label>
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="w-full text-white/40 text-xs"
+                  />
+                  {formData.photo64base && (
+                    <img src={formData.photo64base} className="mt-2 w-20 h-20 object-cover rounded-xl border border-white/20" />
+                  )}
+                </div>
+
+                <div className="pt-4 space-y-3">
+                  <button 
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-4 rounded-2xl bg-neon-amber text-black font-black uppercase tracking-widest shadow-[0_0_20px_rgba(255,157,0,0.3)] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                  >
+                    {loading ? 'PROSES...' : (editingItem ? 'UPDATE SEKARANG' : 'TAMBAH PRODUK')}
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => { setShowAdminPanel(false); setEditingItem(null); }}
+                    className="w-full py-4 rounded-2xl bg-white/5 text-white font-bold uppercase tracking-widest hover:bg-white/10 transition-all"
+                  >
+                    BATAL
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header Section */}
       <header className="relative z-10">
         <div className="p-4 flex justify-between items-center glass border-b border-white/10 sticky top-0 z-50">
@@ -144,12 +345,22 @@ export default function App() {
             className="h-10 rounded-lg neon-glow-amber"
             referrerPolicy="no-referrer"
           />
-          <button 
-            onClick={() => isAdmin ? setIsAdmin(false) : setShowLogin(true)}
-            className="p-2 rounded-full glass hover:bg-white/10 transition-all"
-          >
-            {isAdmin ? <LogOut className="w-5 h-5 text-neon-amber" /> : <LogIn className="w-5 h-5 text-neon-amber" />}
-          </button>
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <button 
+                onClick={() => { setEditingItem(null); setShowAdminPanel(true); }}
+                className="px-3 py-1.5 rounded-full bg-neon-cyan/20 border border-neon-cyan/50 text-neon-cyan text-[10px] font-black uppercase tracking-widest hover:bg-neon-cyan hover:text-black transition-all"
+              >
+                + PRODUK
+              </button>
+            )}
+            <button 
+              onClick={() => isAdmin ? setIsAdmin(false) : setShowLogin(true)}
+              className="p-2 rounded-full glass hover:bg-white/10 transition-all"
+            >
+              {isAdmin ? <LogOut className="w-5 h-5 text-neon-amber" /> : <LogIn className="w-5 h-5 text-neon-amber" />}
+            </button>
+          </div>
         </div>
 
         <div className="relative h-64 w-full overflow-hidden">
@@ -257,6 +468,24 @@ export default function App() {
                   onClick={() => contactWA(item)}
                   className="group relative glass rounded-3xl overflow-hidden cursor-pointer active:scale-95 transition-transform"
                 >
+                  {/* Action Buttons for Admin */}
+                  {isAdmin && (
+                    <div className="absolute top-4 left-4 flex gap-2 z-30">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); openEdit(item); }}
+                        className="p-2 rounded-xl bg-neon-cyan text-black hover:scale-110 transition-all shadow-lg"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
+                        className="p-2 rounded-xl bg-red-500 text-white hover:scale-110 transition-all shadow-lg"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  )}
+
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <img 
                       src={item.photo64base || `https://picsum.photos/seed/${item.kategori}-${item.id}/800/600`} 

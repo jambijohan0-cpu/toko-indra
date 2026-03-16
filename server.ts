@@ -130,8 +130,11 @@ async function startServer() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Server Google merespon dengan status: ${response.status}`);
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Google Response Not JSON:", text);
+        throw new Error("Respon dari Google bukan format JSON. Cek apakah Script sudah di-Deploy sebagai Web App.");
       }
 
       const result = await response.json();
@@ -143,7 +146,10 @@ async function startServer() {
       }
     } catch (error) {
       console.error("Login Error:", error);
-      res.status(500).json({ success: false, message: "Gagal terhubung ke database. Pastikan URL Apps Script benar!" });
+      res.status(500).json({ 
+        success: false, 
+        message: error instanceof Error ? error.message : "Gagal terhubung ke database. Cek URL Apps Script!" 
+      });
     }
   });
 

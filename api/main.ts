@@ -46,18 +46,20 @@ app.get("/api/health", (req, res) => {
 
 const formatRupiah = (val: any) => {
   if (!val) return "Rp 0";
-  // If it's already a formatted string, return it, otherwise format it
   if (typeof val === 'string' && val.includes('Rp')) return val;
-  
   const num = typeof val === 'number' ? val : parseInt(String(val).replace(/[^0-9]/g, ''), 10);
   if (isNaN(num)) return "Rp 0";
-  
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(num).replace('IDR', 'Rp');
+};
+
+const getGaulLabel = () => {
+  const labels = ["POTONGAN GOKIL!", "HEMAT PARAH!", "CUAN BANGET!", "DISKON SADIS!", "HARGA MIRING!"];
+  return labels[Math.floor(Math.random() * labels.length)];
 };
 
 // API Routes
@@ -72,18 +74,26 @@ app.get("/api/furniture", async (req, res) => {
 
     const furniture = rows
       .filter((row: any) => Array.isArray(row) && row.length >= 2 && row[1] !== "")
-      .map((row: any) => ({
-        id: row[0],
-        timestamp: row[0] || "",
-        kategori: row[1] || "Uncategorized",
-        harga: formatRupiah(row[2]),
-        diskon: row[3] ? formatRupiah(row[3]) : "",
-        tanggal_diskon_sampai: row[4] || "",
-        keterangan: row[5] || "",
-        stock: row[6] || "0",
-        status: row[7] || "Ready",
-        photo64base: row[8] || "",
-      })).reverse(); 
+      .map((row: any) => {
+        const hargaNormal = typeof row[2] === 'number' ? row[2] : parseInt(String(row[2]).replace(/[^0-9]/g, ''), 10) || 0;
+        const diskonNominal = typeof row[3] === 'number' ? row[3] : parseInt(String(row[3]).replace(/[^0-9]/g, ''), 10) || 0;
+        const hargaFinal = hargaNormal - diskonNominal;
+
+        return {
+          id: row[0],
+          timestamp: row[0] || "",
+          kategori: row[1] || "Uncategorized",
+          harga: formatRupiah(hargaFinal),
+          harga_asli: diskonNominal > 0 ? formatRupiah(hargaNormal) : "",
+          diskon: diskonNominal > 0 ? formatRupiah(diskonNominal) : "",
+          gaul_label: diskonNominal > 0 ? getGaulLabel() : "",
+          tanggal_diskon_sampai: row[4] || "",
+          keterangan: row[5] || "",
+          stock: row[6] || "0",
+          status: row[7] || "Ready",
+          photo64base: row[8] || "",
+        };
+      }).reverse(); 
 
     res.json(furniture);
   } catch (error) {

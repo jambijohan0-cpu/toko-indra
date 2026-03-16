@@ -577,14 +577,40 @@ export default function App() {
                   <div className="p-4 space-y-2">
                     <div className="flex justify-between items-end">
                       <div className="space-y-1">
+                        {item.harga_asli && (
+                          <div className="flex flex-col mb-1">
+                            <motion.div 
+                              animate={{ 
+                                x: [-2, 2, -2],
+                              }}
+                              transition={{ 
+                                repeat: Infinity, 
+                                duration: 1.5,
+                                ease: "linear"
+                              }}
+                              className="flex items-center gap-2 mb-1"
+                            >
+                              <motion.span 
+                                className="text-[10px] font-black text-neon-cyan bg-neon-cyan/10 px-2 py-0.5 rounded-sm w-fit animate-pulse"
+                              >
+                                {item.gaul_label}
+                              </motion.span>
+                              <motion.span
+                                animate={{ scale: [1, 1.1, 1] }}
+                                transition={{ repeat: Infinity, duration: 1 }}
+                                className="text-[10px] font-black text-neon-amber uppercase tracking-tighter"
+                              >
+                                HEMAT {item.diskon}!!
+                              </motion.span>
+                            </motion.div>
+                            <span className="text-xs text-white/40 line-through decoration-neon-amber/50">
+                              {item.harga_asli}
+                            </span>
+                          </div>
+                        )}
                         <p className="text-2xl font-black tracking-tighter italic">
                           {item.harga}
                         </p>
-                        {item.diskon && (
-                          <p className="text-xs text-white/40 line-through">
-                            {item.diskon}
-                          </p>
-                        )}
                       </div>
                       <div className="text-right">
                         <p className={cn(

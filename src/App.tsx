@@ -458,6 +458,25 @@ export default function App() {
         </div>
       </header>
 
+      {/* Catchy Slang Marquee */}
+      <div className="bg-neon-amber/10 border-y border-neon-amber/20 py-2 overflow-hidden whitespace-nowrap">
+        <motion.div 
+          animate={{ x: [0, -1000] }}
+          transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+          className="inline-block"
+        >
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-neon-amber px-4">
+            🔥 Furniture paling kece & ter-mewah se-Kota Jambi! Kualitas ngeri, harga bersahabat. Cek katalog kita sekarang, Bosku! 🛋️✨
+          </span>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-neon-amber px-4">
+            🔥 Furniture paling kece & ter-mewah se-Kota Jambi! Kualitas ngeri, harga bersahabat. Cek katalog kita sekarang, Bosku! 🛋️✨
+          </span>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-neon-amber px-4">
+            🔥 Furniture paling kece & ter-mewah se-Kota Jambi! Kualitas ngeri, harga bersahabat. Cek katalog kita sekarang, Bosku! 🛋️✨
+          </span>
+        </motion.div>
+      </div>
+
       {/* Info Section - FULLY TRANSPARENT & ANIMATED */}
       <section className="px-4 -mt-36 relative z-20 space-y-4">
         <motion.div 

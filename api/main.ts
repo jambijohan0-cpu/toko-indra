@@ -29,12 +29,12 @@ async function getSheetData(sheetName: string) {
 }
 
 // Helper to post data to Apps Script
-async function postToSheet(action: string, data: any, id?: any) {
+async function postToSheet(action: string, data: any, id?: any, sheetName: string = "Gambar") {
   if (!WEB_APP_URL) throw new Error("WEB_APP_URL belum dikonfigurasi");
   const response = await fetch(WEB_APP_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action, data, id, sheet: "Gambar" }),
+    body: JSON.stringify({ action, data, id, sheet: sheetName }),
   });
   return await response.json();
 }
@@ -167,6 +167,17 @@ app.delete("/api/furniture/:id", async (req, res) => {
     res.json(result);
   } catch (error) {
     res.status(500).json({ success: false, error: "Gagal menghapus data" });
+  }
+});
+
+app.put("/api/promo", async (req, res) => {
+  try {
+    const { text, diskon } = req.body;
+    // Update promo di baris pertama (ID 1)
+    const result = await postToSheet("update", [text, diskon], 1, "Promo");
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Gagal update promo" });
   }
 });
 

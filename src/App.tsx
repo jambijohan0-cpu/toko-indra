@@ -72,6 +72,7 @@ export default function App() {
   
   // Admin Management State
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [adminTab, setAdminTab] = useState<'furniture' | 'promo'>('furniture');
   const [editingItem, setEditingItem] = useState<FurnitureItem | null>(null);
   const [formData, setFormData] = useState({
     kategori: '',
@@ -82,6 +83,10 @@ export default function App() {
     stock: '',
     status: 'Ready',
     photo64base: ''
+  });
+  const [promoFormData, setPromoFormData] = useState({
+    text: '',
+    diskon: ''
   });
 
   const categories = ['Semua', ...Array.from(new Set(items.map(item => item.kategori)))];
@@ -106,18 +111,23 @@ export default function App() {
     incrementVisitor();
   }, []);
 
-  useEffect(() => {
-    const fetchPromo = async () => {
-      try {
-        const res = await fetch('/api/promo');
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          setPromo(data[0]);
-        }
-      } catch (err) {
-        console.error('Failed to fetch promo:', err);
+  const fetchPromo = async () => {
+    try {
+      const res = await fetch('/api/promo');
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setPromo(data[0]);
+        setPromoFormData({
+          text: data[0].text,
+          diskon: data[0].diskon
+        });
       }
-    };
+    } catch (err) {
+      console.error('Failed to fetch promo:', err);
+    }
+  };
+
+  useEffect(() => {
     fetchPromo();
   }, []);
 
@@ -224,8 +234,32 @@ export default function App() {
           kategori: '', harga: '', diskon: '', tanggal_diskon_sampai: '',
           keterangan: '', stock: '', status: 'Ready', photo64base: ''
         });
-        // Refresh halaman utama sesuai permintaan
-        window.location.reload();
+        // Refresh data tanpa reload halaman agar tetap di admin panel
+        fetchFurniture();
+      } else {
+        alert('Gagal: ' + result.error);
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan sistem.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePromoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await fetch('/api/promo', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(promoFormData),
+      });
+      
+      const result = await res.json();
+      if (result.success) {
+        alert('Promo Berhasil Diupdate!');
+        fetchPromo();
       } else {
         alert('Gagal: ' + result.error);
       }
@@ -267,6 +301,7 @@ export default function App() {
       status: item.status,
       photo64base: item.photo64base
     });
+    setAdminTab('furniture');
     setShowAdminPanel(true);
   };
 
@@ -315,103 +350,176 @@ export default function App() {
             <motion.div 
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
-              className="w-full max-w-md bg-zinc-900 border border-white/10 rounded-[32px] p-8 overflow-y-auto max-h-[90vh]"
+              className="w-full max-w-md bg-zinc-900 border border-white/10 rounded-[32px] p-8 overflow-y-auto max-h-[90vh] relative"
             >
-              <h2 className="text-2xl font-black text-white mb-6 uppercase tracking-tighter italic">
-                {editingItem ? 'EDIT PRODUK' : 'TAMBAH PRODUK'}
-              </h2>
-              
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Kategori</label>
-                  <input 
-                    type="text" 
-                    required
-                    value={formData.kategori}
-                    onChange={e => setFormData({...formData, kategori: e.target.value})}
-                    className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
-                    placeholder="Contoh: Sofa, Meja..."
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Harga</label>
-                    <input 
-                      type="text" 
-                      required
-                      value={formData.harga}
-                      onChange={e => setFormData({...formData, harga: e.target.value})}
-                      className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
-                      placeholder="Rp 1.000.000"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Stock</label>
-                    <input 
-                      type="number" 
-                      required
-                      value={formData.stock}
-                      onChange={e => setFormData({...formData, stock: e.target.value})}
-                      className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Diskon (Opsional)</label>
-                  <input 
-                    type="text" 
-                    value={formData.diskon}
-                    onChange={e => setFormData({...formData, diskon: e.target.value})}
-                    className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
-                    placeholder="Harga Coret (Rp 1.200.000)"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Keterangan / Promo</label>
-                  <input 
-                    type="text" 
-                    value={formData.keterangan}
-                    onChange={e => setFormData({...formData, keterangan: e.target.value})}
-                    className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
-                    placeholder="Contoh: 15% OFF, NEW, HOT"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Foto Produk</label>
-                  <input 
-                    type="file" 
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="w-full text-white/40 text-xs"
-                  />
-                  {formData.photo64base && (
-                    <img 
-                      src={normalizeImageUrl(formData.photo64base)} 
-                      className="mt-2 w-20 h-20 object-cover rounded-xl border border-white/20" 
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://picsum.photos/seed/preview/800/600`;
-                      }}
-                    />
+              <div className="flex gap-4 mb-6 border-b border-white/10 pb-2">
+                <button 
+                  onClick={() => setAdminTab('furniture')}
+                  className={cn(
+                    "text-xs font-black uppercase tracking-widest pb-2 transition-all",
+                    adminTab === 'furniture' ? "text-neon-cyan border-b-2 border-neon-cyan" : "text-white/40"
                   )}
-                </div>
+                >
+                  Furniture
+                </button>
+                <button 
+                  onClick={() => setAdminTab('promo')}
+                  className={cn(
+                    "text-xs font-black uppercase tracking-widest pb-2 transition-all",
+                    adminTab === 'promo' ? "text-neon-amber border-b-2 border-neon-amber" : "text-white/40"
+                  )}
+                >
+                  Promo
+                </button>
+              </div>
 
-                <div className="pt-4 space-y-3">
-                  <button 
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-4 rounded-2xl bg-neon-amber text-black font-black uppercase tracking-widest shadow-[0_0_20px_rgba(255,157,0,0.3)] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
-                  >
-                    {loading ? 'PROSES...' : (editingItem ? 'UPDATE SEKARANG' : 'TAMBAH PRODUK')}
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={() => { setShowAdminPanel(false); setEditingItem(null); }}
-                    className="w-full py-4 rounded-2xl bg-white/5 text-white font-bold uppercase tracking-widest hover:bg-white/10 transition-all"
-                  >
-                    BATAL
-                  </button>
-                </div>
-              </form>
+              {adminTab === 'furniture' ? (
+                <>
+                  <h2 className="text-2xl font-black text-white mb-6 uppercase tracking-tighter italic">
+                    {editingItem ? 'EDIT PRODUK' : 'TAMBAH PRODUK'}
+                  </h2>
+                  
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Kategori</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={formData.kategori}
+                        onChange={e => setFormData({...formData, kategori: e.target.value})}
+                        className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
+                        placeholder="Contoh: Sofa, Meja..."
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Harga</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={formData.harga}
+                          onChange={e => setFormData({...formData, harga: e.target.value})}
+                          className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
+                          placeholder="Rp 1.000.000"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Stock</label>
+                        <input 
+                          type="number" 
+                          required
+                          value={formData.stock}
+                          onChange={e => setFormData({...formData, stock: e.target.value})}
+                          className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Diskon (Opsional)</label>
+                      <input 
+                        type="text" 
+                        value={formData.diskon}
+                        onChange={e => setFormData({...formData, diskon: e.target.value})}
+                        className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
+                        placeholder="Harga Coret (Rp 1.200.000)"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Keterangan / Promo</label>
+                      <input 
+                        type="text" 
+                        value={formData.keterangan}
+                        onChange={e => setFormData({...formData, keterangan: e.target.value})}
+                        className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
+                        placeholder="Contoh: 15% OFF, NEW, HOT"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Foto Produk</label>
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="w-full text-white/40 text-xs"
+                      />
+                      {formData.photo64base && (
+                        <img 
+                          src={normalizeImageUrl(formData.photo64base)} 
+                          className="mt-2 w-20 h-20 object-cover rounded-xl border border-white/20" 
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = `https://picsum.photos/seed/preview/800/600`;
+                          }}
+                        />
+                      )}
+                    </div>
+
+                    <div className="pt-4 space-y-3">
+                      <button 
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-4 rounded-2xl bg-neon-cyan text-black font-black uppercase tracking-widest shadow-[0_0_20px_rgba(0,242,255,0.3)] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                      >
+                        {loading ? 'PROSES...' : (editingItem ? 'UPDATE SEKARANG' : 'TAMBAH PRODUK')}
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => { setShowAdminPanel(false); setEditingItem(null); }}
+                        className="w-full py-4 rounded-2xl bg-white/5 text-white font-bold uppercase tracking-widest hover:bg-white/10 transition-all"
+                      >
+                        KELUAR ADMIN
+                      </button>
+                    </div>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-2xl font-black text-white mb-6 uppercase tracking-tighter italic">
+                    EDIT PROMO UTAMA
+                  </h2>
+                  
+                  <form onSubmit={handlePromoSubmit} className="space-y-4">
+                    <div>
+                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Teks Promo</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={promoFormData.text}
+                        onChange={e => setPromoFormData({...promoFormData, text: e.target.value})}
+                        className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
+                        placeholder="Contoh: Ramadhan Sale..."
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2 block">Diskon (%)</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={promoFormData.diskon}
+                        onChange={e => setPromoFormData({...promoFormData, diskon: e.target.value})}
+                        className="w-full bg-black border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-amber outline-none transition-all"
+                        placeholder="Contoh: 40% atau 0.4"
+                      />
+                    </div>
+
+                    <div className="pt-4 space-y-3">
+                      <button 
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-4 rounded-2xl bg-neon-amber text-black font-black uppercase tracking-widest shadow-[0_0_20px_rgba(255,157,0,0.3)] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                      >
+                        {loading ? 'PROSES...' : 'SIMPAN PROMO'}
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => { setShowAdminPanel(false); }}
+                        className="w-full py-4 rounded-2xl bg-white/5 text-white font-bold uppercase tracking-widest hover:bg-white/10 transition-all"
+                      >
+                        KELUAR ADMIN
+                      </button>
+                    </div>
+                  </form>
+                </>
+              )}
             </motion.div>
           </motion.div>
         )}
@@ -456,12 +564,20 @@ export default function App() {
               <RefreshCw className="w-5 h-5 text-neon-cyan" />
             </button>
             {isAdmin && (
-              <button 
-                onClick={() => { setEditingItem(null); setShowAdminPanel(true); }}
-                className="px-3 py-1.5 rounded-full bg-neon-cyan/20 border border-neon-cyan/50 text-neon-cyan text-[10px] font-black uppercase tracking-widest hover:bg-neon-cyan hover:text-black transition-all"
-              >
-                + PRODUK
-              </button>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => { setEditingItem(null); setAdminTab('furniture'); setShowAdminPanel(true); }}
+                  className="px-3 py-1.5 rounded-full bg-neon-cyan/20 border border-neon-cyan/50 text-neon-cyan text-[10px] font-black uppercase tracking-widest hover:bg-neon-cyan hover:text-black transition-all"
+                >
+                  + PRODUK
+                </button>
+                <button 
+                  onClick={() => { setAdminTab('promo'); setShowAdminPanel(true); }}
+                  className="px-3 py-1.5 rounded-full bg-neon-amber/20 border border-neon-amber/50 text-neon-amber text-[10px] font-black uppercase tracking-widest hover:bg-neon-amber hover:text-black transition-all"
+                >
+                  EDIT PROMO
+                </button>
+              </div>
             )}
             <button 
               onClick={() => isAdmin ? setIsAdmin(false) : setShowLogin(true)}

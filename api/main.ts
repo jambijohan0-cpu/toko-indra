@@ -101,6 +101,41 @@ app.get("/api/furniture", async (req, res) => {
   }
 });
 
+app.get("/api/promo", async (req, res) => {
+  try {
+    const data = await getSheetData("Promo");
+    let rows: any[] = Array.isArray(data) ? data : [];
+    
+    if (rows.length > 0 && Array.isArray(rows[0]) && String(rows[0][0]).toLowerCase().includes("promo")) {
+      rows = rows.slice(1);
+    }
+
+    const promos = rows
+      .filter((row: any) => Array.isArray(row) && row.length >= 2 && row[0] !== "")
+      .map((row: any) => {
+        let diskon = row[1];
+        // Handle conversion from decimal (0.4) to percentage (40%)
+        if (typeof diskon === 'number' && diskon <= 1 && diskon > 0) {
+          diskon = Math.round(diskon * 100) + "%";
+        } else if (diskon !== null && diskon !== undefined) {
+          diskon = String(diskon);
+          if (!diskon.includes('%') && !isNaN(Number(diskon))) {
+            const num = Number(diskon);
+            if (num <= 1 && num > 0) diskon = Math.round(num * 100) + "%";
+          }
+        }
+        return {
+          text: row[0],
+          diskon: diskon || "0%"
+        };
+      });
+
+    res.json(promos);
+  } catch (error) {
+    res.status(500).json({ error: "Gagal mengambil data promo" });
+  }
+});
+
 app.post("/api/furniture", async (req, res) => {
   try {
     const { kategori, harga, diskon, tanggal_diskon_sampai, keterangan, stock, status, photo64base } = req.body;

@@ -68,6 +68,7 @@ export default function App() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [visitorCount, setVisitorCount] = useState<number | null>(null);
+  const [promo, setPromo] = useState<{ text: string; diskon: string } | null>(null);
   
   // Admin Management State
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -103,6 +104,21 @@ export default function App() {
       }
     };
     incrementVisitor();
+  }, []);
+
+  useEffect(() => {
+    const fetchPromo = async () => {
+      try {
+        const res = await fetch('/api/promo');
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setPromo(data[0]);
+        }
+      } catch (err) {
+        console.error('Failed to fetch promo:', err);
+      }
+    };
+    fetchPromo();
   }, []);
 
   const fetchFurniture = async () => {
@@ -468,6 +484,34 @@ export default function App() {
           />
           {/* Very subtle overlay for text readability */}
           <div className="absolute inset-0 bg-black/10" />
+          
+          {/* Promo Badge - High Impact Blinking & Large Text */}
+          {promo && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8, rotate: 30 }}
+              animate={{ 
+                opacity: [1, 0, 1],
+                scale: [1, 1.15, 1],
+              }}
+              transition={{ 
+                opacity: { repeat: Infinity, duration: 1.2, ease: "steps(2)" },
+                scale: { repeat: Infinity, duration: 1.5, ease: "easeInOut" },
+              }}
+              className="absolute top-12 right-4 z-30 pointer-events-none flex flex-col items-center"
+            >
+              <div className="mb-0.5 bg-yellow-400 text-black px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-xl border-2 border-black -rotate-3">
+                {promo.text}
+              </div>
+              <div className="bg-red-600 text-white p-2.5 rounded-lg shadow-[4px_4px_0px_rgba(0,0,0,0.5)] border-2 border-white transform -rotate-6 flex flex-col items-center justify-center min-w-[90px]">
+                <span className="text-[7px] font-black tracking-tighter leading-none uppercase mb-0.5">UP TO</span>
+                <span className="text-3xl font-black tracking-tighter leading-none drop-shadow-[2px_2px_0px_rgba(0,0,0,0.3)]">
+                  {promo.diskon}
+                </span>
+                <span className="text-[9px] font-black tracking-widest leading-none uppercase mt-0.5">OFF</span>
+              </div>
+            </motion.div>
+          )}
+
           <div className="absolute bottom-40 left-4 right-4">
             <motion.h1 
               initial={{ y: 20, opacity: 0 }}

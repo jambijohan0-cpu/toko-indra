@@ -67,6 +67,7 @@ export default function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
   
   // Admin Management State
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -86,6 +87,22 @@ export default function App() {
 
   useEffect(() => {
     fetchFurniture();
+  }, []);
+
+  useEffect(() => {
+    const incrementVisitor = async () => {
+      try {
+        // Menggunakan Counter API gratis untuk menyimpan data secara global
+        const resp = await fetch('https://api.counterapi.dev/v1/toko-indra-app-v2/visitor/up');
+        const data = await resp.json();
+        if (data && data.count) {
+          setVisitorCount(data.count);
+        }
+      } catch (err) {
+        console.error("Visitor counter error:", err);
+      }
+    };
+    incrementVisitor();
   }, []);
 
   const fetchFurniture = async () => {
@@ -401,6 +418,14 @@ export default function App() {
               <span className="text-[8px] font-sans font-black text-blue-500 tracking-[0.6em] mt-1 uppercase">
                 FURNITURE
               </span>
+            </div>
+            <div className="flex flex-col items-start border-l border-white/10 pl-3">
+              <span className="text-[8px] font-black text-white/30 uppercase tracking-widest">Visitors</span>
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] font-bold text-neon-cyan font-mono">
+                  {visitorCount !== null ? visitorCount.toLocaleString() : '...'}
+                </span>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
